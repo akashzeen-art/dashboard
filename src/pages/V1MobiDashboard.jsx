@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback, useMemo } from 'react'
 import {
   fetchV1Data, groupByDateAndCampaign, fmtDateDisplay,
   getToday, getYesterday, getDateBefore, fmtDate,
-  buildCSVRows, downloadCSV, V1_CREDENTIALS
+  buildCSVRows, downloadCSV
 } from '../services/v1api'
 import CampaignTable from '../components/v1/CampaignTable'
 import ExportModal from '../components/v1/ExportModal'
@@ -11,72 +11,6 @@ import DebugPanel from '../components/v1/DebugPanel'
 const HOURS = Array.from({ length: 24 }, (_, i) =>
   `${String(i).padStart(2, '0')}:00-${String(i + 1).padStart(2, '0')}:00`
 )
-
-// ── Login ──────────────────────────────────────────────────────────────────
-function V1Login({ onLogin }) {
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const [showPass, setShowPass] = useState(false)
-  const [error, setError] = useState('')
-  const [loading, setLoading] = useState(false)
-
-  const submit = e => {
-    e.preventDefault()
-    setError('')
-    setLoading(true)
-    setTimeout(() => {
-      if (email === V1_CREDENTIALS.email && password === V1_CREDENTIALS.password) {
-        localStorage.setItem('v1_auth', '1')
-        onLogin()
-      } else {
-        setError('Invalid email or password. Please try again.')
-        setPassword('')
-      }
-      setLoading(false)
-    }, 500)
-  }
-
-  return (
-    <div className="min-h-screen flex items-center justify-center px-4 bg-gradient-to-br from-[#667eea] to-[#764ba2]">
-      <div className="w-full max-w-md">
-        <div className="bg-white rounded-2xl shadow-2xl p-10 animate-slide-in">
-          <h1 className="text-3xl font-bold text-center text-[#667eea] mb-1">📊 V1 Mobi Dashboard</h1>
-          <p className="text-center text-gray-500 mb-8">Login to Continue</p>
-          <form onSubmit={submit} className="space-y-5">
-            <div>
-              <label className="block text-sm font-semibold text-gray-600 mb-1.5">Email</label>
-              <input type="email" value={email} onChange={e => { setEmail(e.target.value); setError('') }}
-                placeholder="Enter your email" required autoComplete="email"
-                className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl text-sm focus:outline-none focus:border-[#667eea] transition-colors" />
-            </div>
-            <div>
-              <label className="block text-sm font-semibold text-gray-600 mb-1.5">Password</label>
-              <div className="relative">
-                <input type={showPass ? 'text' : 'password'} value={password}
-                  onChange={e => { setPassword(e.target.value); setError('') }}
-                  placeholder="Enter your password" required autoComplete="current-password"
-                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl text-sm focus:outline-none focus:border-[#667eea] transition-colors pr-10" />
-                <button type="button" onClick={() => setShowPass(s => !s)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 text-sm">
-                  {showPass ? '🙈' : '👁️'}
-                </button>
-              </div>
-            </div>
-            {error && (
-              <div className="bg-red-50 border border-red-200 text-red-600 text-sm px-4 py-3 rounded-xl">
-                {error}
-              </div>
-            )}
-            <button type="submit" disabled={loading}
-              className="w-full py-3 bg-gradient-to-r from-[#667eea] to-[#764ba2] text-white font-bold rounded-xl hover:opacity-90 disabled:opacity-60 transition-opacity flex items-center justify-center gap-2 mt-2">
-              {loading ? <><span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />Logging in...</> : 'Login'}
-            </button>
-          </form>
-        </div>
-      </div>
-    </div>
-  )
-}
 
 // ── Quick filter button ────────────────────────────────────────────────────
 function QBtn({ active, onClick, children }) {
@@ -93,7 +27,7 @@ function QBtn({ active, onClick, children }) {
 }
 
 // ── Main Dashboard ─────────────────────────────────────────────────────────
-function V1Dashboard({ onLogout }) {
+function V1Dashboard() {
   const [startDate, setStartDate] = useState(getToday())
   const [endDate, setEndDate]     = useState(getToday())
   const [activeFilter, setActiveFilter] = useState('today')
@@ -172,10 +106,7 @@ function V1Dashboard({ onLogout }) {
       {/* Header */}
       <header className="bg-white shadow-sm border-b border-gray-200 px-6 py-4 flex items-center justify-between">
         <h1 className="text-2xl font-bold text-[#667eea]">📊 V1 Mobi Dashboard</h1>
-        <button onClick={onLogout}
-          className="px-4 py-2 bg-red-500 hover:bg-red-600 text-white text-sm font-semibold rounded-xl transition-colors">
-          Logout
-        </button>
+
       </header>
 
       <div className="max-w-screen-2xl mx-auto px-4 sm:px-6 py-6">
@@ -309,15 +240,6 @@ function V1Dashboard({ onLogout }) {
   )
 }
 
-// ── Root: auth gate ────────────────────────────────────────────────────────
 export default function V1MobiDashboard() {
-  const [authed, setAuthed] = useState(() => localStorage.getItem('v1_auth') === '1')
-
-  const logout = () => {
-    localStorage.removeItem('v1_auth')
-    setAuthed(false)
-  }
-
-  if (!authed) return <V1Login onLogin={() => setAuthed(true)} />
-  return <V1Dashboard onLogout={logout} />
+  return <V1Dashboard />
 }
