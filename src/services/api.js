@@ -9,12 +9,23 @@ export async function fetchMISData(date) {
 
 export function aggregateTotals(portals) {
   return portals.reduce(
-    (acc, p) => ({
-      totalRevenue: acc.totalRevenue + (p.totalRevenue ?? 0),
-      successRevenue: acc.successRevenue + (p.successRevenue ?? 0),
-      renewRevenue: acc.renewRevenue + (p.renewRevenue ?? 0),
-    }),
-    { totalRevenue: 0, successRevenue: 0, renewRevenue: 0 }
+    (acc, p) => {
+      const hours = p.hours ?? []
+      const successCount = hours.reduce((s, h) => s + (h.success ?? 0), 0)
+      const renewCount = hours.reduce((s, h) => {
+        const r = h.renew
+        if (!r || typeof r !== 'object') return s
+        return s + Object.values(r).reduce((a, v) => a + (v ?? 0), 0)
+      }, 0)
+      return {
+        totalRevenue: acc.totalRevenue + (p.totalRevenue ?? 0),
+        successRevenue: acc.successRevenue + (p.successRevenue ?? 0),
+        renewRevenue: acc.renewRevenue + (p.renewRevenue ?? 0),
+        successCount: acc.successCount + successCount,
+        renewCount: acc.renewCount + renewCount,
+      }
+    },
+    { totalRevenue: 0, successRevenue: 0, renewRevenue: 0, successCount: 0, renewCount: 0 }
   )
 }
 
