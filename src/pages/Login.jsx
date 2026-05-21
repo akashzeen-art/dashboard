@@ -1,6 +1,6 @@
 import { useState } from 'react'
 
-const CREDENTIALS = { username: 'Misadmin', password: 'Misadmin@123' }
+const CREDENTIALS = { username: 'mis@gmail.com', password: 'Misadmin@123' }
 
 export default function Login({ onLogin }) {
   const [username, setUsername] = useState('')
