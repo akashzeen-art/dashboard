@@ -1,4 +1,4 @@
-const BASE_URL = 'https://ap.eatme.live/api/mis/hourly'
+const BASE_URL = 'https://eatme.live/api/mis/hourly'
 
 export async function fetchMISData(date) {
   const url = date ? `${BASE_URL}?date=${date}` : BASE_URL
